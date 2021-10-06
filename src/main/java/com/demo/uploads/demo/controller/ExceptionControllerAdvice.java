@@ -13,7 +13,7 @@ public class ExceptionControllerAdvice {
 
     @ExceptionHandler(EmailExistsException.class)
     public ResponseEntity<String> handleEmailExistsException(EmailExistsException exception) {
-        return ResponseEntity.badRequest().body(String.format("There is an account with that email adress: %s", exception.getEmail()));
+        return ResponseEntity.badRequest().body(String.format("There is an account with that email address: %s", exception.getEmail()));
     }
 
     @ExceptionHandler(ForbiddenException.class)

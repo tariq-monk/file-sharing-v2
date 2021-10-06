@@ -1,19 +1,20 @@
 package com.demo.uploads.demo.entity.repository;
 
-import lombok.Data;
-import org.hibernate.annotations.GenericGenerator;
-
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Data
-public class User {
-    @GeneratedValue(generator="system-uuid")
-    @GenericGenerator(name="system-uuid", strategy = "uuid")
-    @Id
-    private String id;
-    private String email;
-    private String password;
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class User extends BaseEntity {
+
+	private String email;
+
+	private String password;
 }
