@@ -4,6 +4,8 @@ import com.demo.uploads.demo.entity.dto.UserDto;
 import com.demo.uploads.demo.entity.error.EmailExistsException;
 import com.demo.uploads.demo.repository.UserRepository;
 import com.demo.uploads.demo.entity.repository.User;
+import com.demo.uploads.demo.service.redis.CacheService;
+import com.demo.uploads.demo.utils.RedisUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -24,10 +26,14 @@ public class UserService implements UserDetailsService {
     @Autowired
     private UserRepository repo;
 
+    @Autowired
+    private CacheService cacheService;
+
     @Override
     public UserDetails loadUserByUsername(String username)
         throws UsernameNotFoundException {
-        User user = repo.findByEmail(username);
+        User user = cacheService.get(RedisUtils.getUserKey(username), User.class)
+                .orElseGet(() -> repo.findByEmail(username));
         if (user == null) {
             return null;
         }
@@ -44,7 +50,8 @@ public class UserService implements UserDetailsService {
         user.setEmail(userDto.getEmail());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
 
-        repo.save(user);
+        User savedUser = repo.save(user);
+        cacheService.set(RedisUtils.getUserKey(savedUser.getEmail()), savedUser);
     }
 
 }
