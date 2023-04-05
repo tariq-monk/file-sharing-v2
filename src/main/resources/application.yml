@@ -15,8 +15,17 @@ spring:
         host: localhost
         port: 6379
         password:
+    rabbitmq:
+        host: localhost
+        port: 5672
+        username: guest
+        password: guest
 
 sfox:
-file-share:
+ file-share:
     cache:
         expire_time_mills: 100000000
+    rabbitmq:
+        file_exchange_topic: file.exchange
+        file_changes_queue: file.changes.queue
+        file_routing_key: file.changes
