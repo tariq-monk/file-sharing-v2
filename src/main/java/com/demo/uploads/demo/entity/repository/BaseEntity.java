@@ -1,5 +1,6 @@
 package com.demo.uploads.demo.entity.repository;
 
+import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
@@ -17,9 +18,10 @@ import lombok.Setter;
 public class BaseEntity {
 
 	@GeneratedValue(generator = "system-uuid")
-	@GenericGenerator(name = "system-uuid", strategy = "uuid")
+	@GenericGenerator(name = "system-uuid", strategy = "uuid2")
 	@Id
 	@EqualsAndHashCode.Include
+	@Column(name = "id")
 	private String id;
 
 }
