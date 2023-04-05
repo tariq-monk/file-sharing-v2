@@ -7,8 +7,11 @@ import com.demo.uploads.demo.entity.dto.FileShareRequestDto;
 import com.demo.uploads.demo.entity.error.ForbiddenException;
 import com.demo.uploads.demo.entity.error.NotFoundException;
 import com.demo.uploads.demo.entity.repository.FileEntity;
+import com.demo.uploads.demo.events.FileChangesEvent;
 import com.demo.uploads.demo.repository.FileRepository;
+import com.demo.uploads.demo.service.rabbitMq.RabbitMqService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,15 @@ public class FileService {
 
     @Autowired
     FileStorageProperties fileStorageProperties;
+
+    @Autowired
+    RabbitMqService rabbitMqService;
+
+    @Value(value = "${sfox.file-share.rabbitmq.file_exchange_topic}")
+    private String FILE_EXCHANGE_TOPIC;
+
+    @Value(value = "${sfox.file-share.rabbitmq.file_routing_key}")
+    private String FILE_ROUTING_KEY;
 
     private Path fileStorageLocation;
 
@@ -76,7 +88,10 @@ public class FileService {
         }
 
         file.getSharedUsers().add(requestDto.getEmail());
-        fileRepository.save(file);
+        FileEntity savedFileEntity = fileRepository.save(file);
+
+        rabbitMqService.sendToTopic(FILE_EXCHANGE_TOPIC, FILE_ROUTING_KEY,
+                buildFileChangesEvent(savedFileEntity, savedFileEntity.getId(), "File was shared"));
     }
 
     public FileEntity storeFile(MultipartFile file) throws IOException {
@@ -92,7 +107,12 @@ public class FileService {
         fileEntity.setId(newId);
         fileEntity.setOwner(fileSecurity.getCurrentEmail());
 
-        return fileRepository.save(fileEntity);
+       FileEntity savedFileEntity = fileRepository.save(fileEntity);
+
+        rabbitMqService.sendToTopic(FILE_EXCHANGE_TOPIC, FILE_ROUTING_KEY,
+                buildFileChangesEvent(savedFileEntity, savedFileEntity.getId(), "File was saved"));
+
+        return savedFileEntity;
     }
 
     public Resource loadResource(String id) {
@@ -107,5 +127,15 @@ public class FileService {
         } catch (MalformedURLException ex) {
             throw new NotFoundException(id, ex);
         }
+    }
+
+    private FileChangesEvent buildFileChangesEvent(FileEntity fileEntity, String fileId, String message) {
+        FileChangesEvent fileChangesEvent = FileChangesEvent.builder()
+                .fileEntity(fileEntity)
+                .fileId(fileId)
+                .message(message)
+                .build();
+        fileChangesEvent.setId(UUID.randomUUID());
+        return fileChangesEvent;
     }
 }
