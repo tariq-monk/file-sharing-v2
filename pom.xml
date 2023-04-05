@@ -9,8 +9,8 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.demo.uploads</groupId>
-	<artifactId>demo</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>file-sharing</artifactId>
+	<version>1</version>
 	<name>Uploads Demo</name>
 	<description>'Spring Boot Test' task solution</description>
 
