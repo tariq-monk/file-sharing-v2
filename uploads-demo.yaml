@@ -1,0 +1,77 @@
+namespace: uploads-demo
+uploads-demo:
+  defines: runnable
+  metadata:
+    name: uploads-demo
+    description: '''Spring Boot Test'' task solution'
+    icon: https://emojiapi.dev/api/v1/file_folder.svg
+  containers:
+    uploads-demo:
+      build: .
+  services:
+    http:
+      container: uploads-demo
+      port: 8080
+      host-port: 8080
+      publish: false
+      protocol: TCP
+      description: HTTP server
+  connections:
+    postgres: {}
+    redis:
+      target: aerospike/aerospike
+      service: base-svc
+    rabbitmq:
+      target: rabbitmq/rabbitmq
+      service: rabbitmq-amqp-1
+  variables:
+    com.demo.uploads.directory:
+      env: com.demo.uploads.directory
+      type: string
+      description: Directory for storing uploads
+      value: storage
+    spring.datasource.url:
+      env: spring.datasource.url
+      type: string
+      description: Database connection URL
+      value: <- connection-hostname("postgres")
+    spring.datasource.username:
+      env: spring.datasource.username
+      type: string
+      description: Database connection username
+      value: postgres
+    spring.datasource.password:
+      env: spring.datasource.password
+      type: string
+      description: Database connection password
+      value: '!!!SETME-USE-SECRETS!!!'
+    spring.redis.host:
+      env: spring.redis.host
+      type: string
+      description: Redis host
+      value: <- connection-hostname("redis")
+    spring.redis.port:
+      env: spring.redis.port
+      type: int
+      description: Redis port
+      value: <- connection-port("redis")
+    spring.rabbitmq.host:
+      env: spring.rabbitmq.host
+      type: string
+      description: RabbitMQ host
+      value: <- connection-hostname("rabbitmq")
+    spring.rabbitmq.port:
+      env: spring.rabbitmq.port
+      type: int
+      description: RabbitMQ port
+      value: <- connection-port("rabbitmq")
+    spring.rabbitmq.username:
+      env: spring.rabbitmq.username
+      type: string
+      description: RabbitMQ username
+      value: guest
+    spring.rabbitmq.password:
+      env: spring.rabbitmq.password
+      type: string
+      description: RabbitMQ password
+      value: '!!!SETME-USE-SECRETS!!!'
